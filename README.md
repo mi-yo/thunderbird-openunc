@@ -3,11 +3,11 @@ thunderbird-openunc
 
 Open multibyte UNC links in Mozilla Thunderbird via external program under Windows.
 
-Why?
+Why is it necessary?
 -------------------
 
 Windows explorer does not open multibyte UNC links in Thunderbird.  
-`file:///\\servername\Ｍｕｔｉｂｙｔｅ`  
+`file:///\\servername\Ｍｕｌｔｉｂｙｔｅ`  
 Since opened with url encoded, decode via external program.
 
 
@@ -15,7 +15,7 @@ Settings
 -------------------
 
 1. Build C# program to `OpenUNC.exe` by `build.bat`. (need .NET Framework)
-2. Open UNC links via `OpenUNC.exe` in Thunderbird.  
+2. Open UNC links via `OpenUNC.exe` in Thunderbird. (also need .NET Framework)  
    https://support.mozilla.org/kb/configuration-options-attachments
 
 
