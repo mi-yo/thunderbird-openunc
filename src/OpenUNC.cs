@@ -14,7 +14,7 @@ class OpenUNC
             Uri uri = new Uri( Uri.UnescapeDataString( string.Join( "%20", args ).Replace( "#", "%23" ) ) );
             inputPath = uri.LocalPath + Uri.UnescapeDataString( uri.Fragment );
             CheckAccessible( uri );
-            Process.Start( GetOpenPath( inputPath ) );
+            Process.Start( "explorer.exe", String.Format( "/select, \"{0}\"", GetOpenPath( inputPath ) ) );
         }
         catch( Exception e )
         {
@@ -27,7 +27,17 @@ class OpenUNC
     {
         if( uri.IsUnc )
         {
-            if( new Ping().Send( uri.Host, 100 ).Status != IPStatus.Success )
+            Boolean ipOK = false;
+            try
+            {
+                ipOK = new Ping().Send( uri.Host, 100 ).Status != IPStatus.Success;
+            }
+            catch( Exception )
+            {
+                ipOK = false;
+            }
+
+            if( !ipOK )
             {
                 throw new Exception( String.Format( "Network \"{0}\" not accessible.", uri.Host ) );
             }
@@ -62,7 +72,7 @@ class OpenUNC
         }
         if( openPath.Length != inputPath.Length )
         {
-            MessageBox.Show( String.Format( "Open:\n\"{0}\"\n\nNot found.\n\"{1}\"", openPath, inputPath ),
+            MessageBox.Show( String.Format( "Open:\n\"{0}\"", openPath ),
                 "Information", MessageBoxButtons.OK, MessageBoxIcon.Information );
         }
 
