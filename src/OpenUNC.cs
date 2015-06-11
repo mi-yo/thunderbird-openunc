@@ -27,19 +27,17 @@ class OpenUNC
     {
         if( uri.IsUnc )
         {
-            Boolean ipOK = false;
+            PingReply pingReply = null;
             try
             {
-                ipOK = new Ping().Send( uri.Host, 100 ).Status != IPStatus.Success;
+                pingReply = new Ping().Send( uri.Host, 100 );
             }
-            catch( Exception )
+            finally
             {
-                ipOK = false;
-            }
-
-            if( !ipOK )
-            {
-                throw new Exception( String.Format( "Network \"{0}\" not accessible.", uri.Host ) );
+                if( pingReply == null || pingReply.Status != IPStatus.Success )
+                {
+                    throw new Exception( String.Format( "Network \"{0}\" not accessible.", uri.Host ) );
+                }
             }
         }
         else if( uri.IsLoopback )
