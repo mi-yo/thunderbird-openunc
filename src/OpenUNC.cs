@@ -14,7 +14,15 @@ class OpenUNC
             Uri uri = new Uri( Uri.UnescapeDataString( string.Join( "%20", args ).Replace( "#", "%23" ) ) );
             inputPath = uri.LocalPath + Uri.UnescapeDataString( uri.Fragment );
             CheckAccessible( uri );
-            Process.Start( "explorer.exe", String.Format( "/select, \"{0}\"", GetOpenPath( inputPath ) ) );
+            String openPath = GetOpenPath( inputPath );
+            if( Directory.Exists( openPath ) )
+            {
+                Process.Start( openPath );
+            }
+            else
+            {
+                Process.Start( "explorer.exe", String.Format( "/select, \"{0}\"", openPath ) );
+            }
         }
         catch( Exception e )
         {
