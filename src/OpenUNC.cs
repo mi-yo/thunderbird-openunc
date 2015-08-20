@@ -24,10 +24,21 @@ class OpenUNC
 
             if( Directory.Exists( targetPath ) )
             {
-                Process.Start( targetPath );
+                // Open the directory.
+                // If "targetPath/" and "targetPath.exe" exists, do not start "targetPath.exe".
+                targetPath = targetPath.TrimEnd( Path.DirectorySeparatorChar );
+                if( File.Exists( targetPath + ".exe" ) )
+                {
+                    Process.Start( targetPath + "\\" );
+                }
+                else
+                {
+                    Process.Start( targetPath );
+                }
             }
             else
             {
+                // Open the parent directory of a file.
                 Process.Start( "explorer.exe", String.Format( "/select, \"{0}\"", targetPath ) );
             }
         }
