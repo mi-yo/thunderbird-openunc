@@ -14,14 +14,21 @@ class OpenUNC
             Uri uri = new Uri( Uri.UnescapeDataString( string.Join( "%20", args ).Replace( "#", "%23" ) ) );
             inputPath = uri.LocalPath + Uri.UnescapeDataString( uri.Fragment );
             CheckAccessible( uri );
-            String openPath = GetOpenPath( inputPath );
-            if( Directory.Exists( openPath ) )
+
+            string targetPath = TraverseValidPath( inputPath );
+            if( targetPath.Length != inputPath.Length )
             {
-                Process.Start( openPath );
+                MessageBox.Show( String.Format( "Open:\n\"{0}\"", targetPath ),
+                    "Information", MessageBoxButtons.OK, MessageBoxIcon.Information );
+            }
+
+            if( Directory.Exists( targetPath ) )
+            {
+                Process.Start( targetPath );
             }
             else
             {
-                Process.Start( "explorer.exe", String.Format( "/select, \"{0}\"", openPath ) );
+                Process.Start( "explorer.exe", String.Format( "/select, \"{0}\"", targetPath ) );
             }
         }
         catch( Exception e )
@@ -61,27 +68,22 @@ class OpenUNC
         }
     }
 
-    private static string GetOpenPath( string inputPath )
+    private static string TraverseValidPath( string inputPath )
     {
-        string openPath = inputPath;
-        while( !File.Exists( openPath ) && !Directory.Exists( openPath ) )
+        string targetPath = inputPath;
+        while( !File.Exists( targetPath ) && !Directory.Exists( targetPath ) )
         {
-            DirectoryInfo directoryInfo = Directory.GetParent( openPath );
+            DirectoryInfo directoryInfo = Directory.GetParent( targetPath );
             if( directoryInfo != null )
             {
-                openPath = directoryInfo.FullName;
+                targetPath = directoryInfo.FullName;
             }
             else
             {
                 throw new Exception( String.Format( "Not found." ) );
             }
         }
-        if( openPath.Length != inputPath.Length )
-        {
-            MessageBox.Show( String.Format( "Open:\n\"{0}\"", openPath ),
-                "Information", MessageBoxButtons.OK, MessageBoxIcon.Information );
-        }
 
-        return openPath;
+        return targetPath;
     }
 }
