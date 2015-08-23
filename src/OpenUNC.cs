@@ -2,11 +2,21 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Net.NetworkInformation;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 class OpenUNC
 {
-    static void Main( string[] args )
+    [DllImport( "shell32.dll", CharSet = CharSet.Unicode )]
+    private static extern IntPtr ILCreateFromPathW( string pszPath );
+
+    [DllImport( "shell32.dll" )]
+    private static extern int SHOpenFolderAndSelectItems( IntPtr pidlFolder, int cild, IntPtr apidl, int dwFlags );
+
+    [DllImport( "shell32.dll" )]
+    private static extern void ILFree( IntPtr pidl );
+
+    public static void Main( string[] args )
     {
         string inputPath = string.Join( " ", args );
         try
@@ -22,25 +32,7 @@ class OpenUNC
                     "Information", MessageBoxButtons.OK, MessageBoxIcon.Information );
             }
 
-            if( Directory.Exists( targetPath ) )
-            {
-                // Open the directory.
-                // If "targetPath/" and "targetPath.exe" exists, do not start "targetPath.exe".
-                targetPath = targetPath.TrimEnd( Path.DirectorySeparatorChar );
-                if( File.Exists( targetPath + ".exe" ) )
-                {
-                    Process.Start( targetPath + "\\" );
-                }
-                else
-                {
-                    Process.Start( targetPath );
-                }
-            }
-            else
-            {
-                // Open the parent directory of a file.
-                Process.Start( "explorer.exe", String.Format( "/select, \"{0}\"", targetPath ) );
-            }
+            openPath( targetPath );
         }
         catch( Exception e )
         {
@@ -96,5 +88,31 @@ class OpenUNC
         }
 
         return targetPath;
+    }
+
+    private static void openPath( string targetPath )
+    {
+        if( Directory.Exists( targetPath ) )
+        {
+            // Open the directory.
+            // Don't start "targetPath.exe" when "targetPath/" and "targetPath.exe" exists.
+            targetPath = targetPath.TrimEnd( Path.DirectorySeparatorChar );
+            if( File.Exists( targetPath + ".exe" ) )
+            {
+                Process.Start( targetPath + "\\" );
+            }
+            else
+            {
+                Process.Start( targetPath );
+            }
+        }
+        else
+        {
+            // Open the parent directory of a file.
+            // Don't open a new explorer window when "targetPath" window is opened.
+            IntPtr pidl = ILCreateFromPathW( targetPath );
+            SHOpenFolderAndSelectItems( pidl, 0, IntPtr.Zero, 0 );
+            ILFree( pidl );
+        }
     }
 }
